@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Action</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .user-welcome {
+            background: rgba(255,255,255,0.2);
+            padding: 15px 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .user-avatar-large {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid white;
+        }
+
+        .user-details {
+            color: white;
+        }
+
+        .user-details h2 {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+
+        .user-details p {
+            opacity: 0.9;
+        }
+
+        .choices {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .choice-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .choice-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+        }
+
+        .choice-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .choice-title {
+            font-size: 1.5em;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .choice-description {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .logout-btn:hover {
+            background: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+
+    <div class="container">
+        <div class="header">
+            <h1>🎁 Welcome!</h1>
+            <p>What would you like to do today?</p>
+        </div>
+
+        <div class="user-welcome">
+            <img id="user-avatar-large" class="user-avatar-large" src="" alt="User">
+            <div class="user-details">
+                <h2 id="user-name-large"></h2>
+                <p id="user-email"></p>
+            </div>
+        </div>
+
+        <div class="choices">
+            <div class="choice-card" onclick="goToCustomer()">
+                <div class="choice-icon">👥</div>
+                <div class="choice-title">Customer Portal</div>
+                <div class="choice-description">
+                    Refer friends and generate discount codes for them
+                </div>
+            </div>
+
+            <div class="choice-card" onclick="goToRedeem()">
+                <div class="choice-icon">🎟️</div>
+                <div class="choice-title">Redeem Code</div>
+                <div class="choice-description">
+                    Use your referral code to claim your discount
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function checkAuth() {
+            if (sessionStorage.getItem('isLoggedIn') !== 'true') {
+                window.location.href = 'index.html';
+            }
+        }
+
+        function goToCustomer() {
+            window.location.href = 'customer.html';
+        }
+
+        function goToRedeem() {
+            window.location.href = 'redeem.html';
+        }
+
+        function logout() {
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        window.addEventListener('load', () => {
+            checkAuth();
+            
+            const name = sessionStorage.getItem('userName');
+            const email = sessionStorage.getItem('userEmail');
+            const photo = sessionStorage.getItem('userPhoto');
+            
+            document.getElementById('user-name-large').textContent = name;
+            document.getElementById('user-email').textContent = email;
+            document.getElementById('user-avatar-large').src = photo;
+        });
+    </script>
+</body>
+</html>

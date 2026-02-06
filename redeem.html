@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redeem Code</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid #667eea;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            text-transform: uppercase;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        .back-btn {
+            background: #6c757d;
+            margin-bottom: 20px;
+            width: auto;
+            padding: 10px 20px;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .discount-display {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 30px;
+            display: none;
+        }
+
+        .discount-display h2 {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .discount-display p {
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="goBack()">← Back</button>
+            <div class="user-info">
+                <img id="user-avatar" class="user-avatar" src="" alt="User">
+                <span class="user-name" id="user-name"></span>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h1>🎟️ Redeem Code</h1>
+            <p class="subtitle">Enter your referral code to claim discount</p>
+
+            <div class="form-group">
+                <label>Discount Code</label>
+                <input type="text" id="redeem-code" placeholder="Enter code (e.g., REFABC123)">
+            </div>
+            <button onclick="redeemCode()">Redeem Code</button>
+            <div id="redeem-success" class="success-message"></div>
+            <div id="redeem-error" class="error-message"></div>
+            
+            <div id="discount-display" class="discount-display">
+                <h2 id="discount-percent"></h2>
+                <p>Discount Applied!</p>
+                <p style="font-size: 0.9em; margin-top: 20px;">Code: <span id="redeemed-code"></span></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function checkAuth() {
+            if (sessionStorage.getItem('isLoggedIn') !== 'true') {
+                window.location.href = 'index.html';
+                return false;
+            }
+            return true;
+        }
+
+        function goBack() {
+            window.location.href = 'choice.html';
+        }
+
+        function getStorage() {
+            const data = localStorage.getItem('referralData');
+            return data ? JSON.parse(data) : { codes: [], discountRate: 10, usedCodes: [] };
+        }
+
+        function saveStorage(data) {
+            localStorage.setItem('referralData', JSON.stringify(data));
+        }
+
+        function redeemCode() {
+            const code = document.getElementById('redeem-code').value.toUpperCase();
+            const successDiv = document.getElementById('redeem-success');
+            const errorDiv = document.getElementById('redeem-error');
+            const discountDisplay = document.getElementById('discount-display');
+
+            successDiv.style.display = 'none';
+            errorDiv.style.display = 'none';
+            discountDisplay.style.display = 'none';
+
+            if (!code) {
+                errorDiv.textContent = 'Please enter a code';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            const storage = getStorage();
+            const codeData = storage.codes.find(c => c.code === code);
+
+            if (!codeData) {
+                errorDiv.textContent = 'Invalid code';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            if (codeData.used) {
+                errorDiv.textContent = 'This code has already been used';
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Mark as used
+            codeData.used = true;
+            codeData.usedAt = new Date().toISOString();
+            codeData.usedBy = sessionStorage.getItem('userEmail');
+            
+            // Add to used codes history
+            if (!storage.usedCodes) {
+                storage.usedCodes = [];
+            }
+            storage.usedCodes.push(code);
+            
+            saveStorage(storage);
+
+            // Show success
+            document.getElementById('discount-percent').textContent = `${codeData.discount}% OFF`;
+            document.getElementById('redeemed-code').textContent = code;
+            discountDisplay.style.display = 'block';
+
+            successDiv.innerHTML = `
+                <strong>Success!</strong> Code redeemed successfully!<br>
+                You saved <strong>${codeData.discount}%</strong> on your purchase
+            `;
+            successDiv.style.display = 'block';
+
+            document.getElementById('redeem-code').value = '';
+        }
+
+        window.addEventListener('load', () => {
+            if (checkAuth()) {
+                const name = sessionStorage.getItem('userName');
+                const photo = sessionStorage.getItem('userPhoto');
+                
+                document.getElementById('user-name').textContent = name;
+                document.getElementById('user-avatar').src = photo;
+                
+                const urlParams = new URLSearchParams(window.location.search);
+                const code = urlParams.get('code');
+                
+                if (code) {
+                    document.getElementById('redeem-code').value = code;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

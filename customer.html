@@ -162,6 +162,15 @@
             display: none;
         }
 
+        .warning-message {
+            background: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+        }
+
         .scratch-card {
             position: relative;
             width: 100%;
@@ -299,6 +308,7 @@
             <button onclick="generateReferral()">Refer Friend & Get My Discount Code</button>
             <div id="customer-success" class="success-message"></div>
             <div id="customer-error" class="error-message"></div>
+            <div id="customer-warning" class="warning-message"></div>
             <div id="scratch-card-container"></div>
 
             <div class="history-section">
@@ -403,29 +413,40 @@
         }
 
         function generateReferral() {
-            const customerEmail = document.getElementById('customer-email').value;
+            const customerEmail = document.getElementById('customer-email').value.toLowerCase();
             const friendEmail = document.getElementById('friend-email').value.trim().toLowerCase();
             const successDiv = document.getElementById('customer-success');
             const errorDiv = document.getElementById('customer-error');
+            const warningDiv = document.getElementById('customer-warning');
 
             successDiv.style.display = 'none';
             errorDiv.style.display = 'none';
+            warningDiv.style.display = 'none';
 
-            // Validation
+            // Validation 1: Valid email format
             if (!friendEmail || !friendEmail.includes('@')) {
                 errorDiv.textContent = 'Please enter a valid friend email address';
                 errorDiv.style.display = 'block';
                 return;
             }
 
-            // Check if trying to refer themselves
-            if (friendEmail === customerEmail.toLowerCase()) {
+            // Validation 2: Cannot refer yourself
+            if (friendEmail === customerEmail) {
                 errorDiv.innerHTML = '<strong>Error:</strong> You cannot refer yourself! Please enter a different email address.';
                 errorDiv.style.display = 'block';
                 return;
             }
 
+            // Validation 3: Check if this email has already been referred
             const storage = getStorage();
+            const existingReferral = storage.codes.find(c => c.referee.toLowerCase() === friendEmail);
+            
+            if (existingReferral) {
+                errorDiv.innerHTML = `<strong>Error:</strong> ${friendEmail} has already been referred by ${existingReferral.referrer}. Each email can only be referred once.`;
+                errorDiv.style.display = 'block';
+                return;
+            }
+
             const code = generateCode();
             const discount = storage.discountRate;
 
@@ -460,10 +481,10 @@
 
         function loadHistory() {
             const storage = getStorage();
-            const customerEmail = sessionStorage.getItem('userEmail');
+            const customerEmail = sessionStorage.getItem('userEmail').toLowerCase();
             
             // Filter codes where user is the referrer (they own the code)
-            const userCodes = storage.codes.filter(c => c.referrer.toLowerCase() === customerEmail.toLowerCase());
+            const userCodes = storage.codes.filter(c => c.referrer.toLowerCase() === customerEmail);
             
             const historyList = document.getElementById('history-list');
             
